@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine</title>
+    <!-- Material UI CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        pre {
+            background-color: #f4f4f9;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .rule-container {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rule Engine Application</h1>
+        
+        <h2>Create Rule</h2>
+        <form id="create-rule-form">
+            <div class="input-field">
+                <input type="text" id="ruleName" name="ruleName" required>
+                <label for="ruleName">Rule Name</label>
+            </div>
+            <div class="input-field">
+                <input type="text" id="ruleString" name="ruleString" required>
+                <label for="ruleString">Rule</label>
+            </div>
+            <button class="btn waves-effect waves-light" type="submit">Create Rule</button>
+        </form>
+        <pre id="create-rule-result"></pre>
+
+        <h2>Combine Rules</h2>
+        <form id="combine-rules-form">
+            <h3>Enter Rules to Combine:</h3>
+            <div id="rules-inputs">
+                <div class="rule-container">
+                    <div class="input-field">
+                        <input type="text" id="combine-rule1" name="rule1" required>
+                        <label for="combine-rule1">Rule 1</label>
+                    </div>
+                    <div class="input-field">
+                        <select id="operator1" name="operator1">
+                            <option value="AND">AND</option>
+                            <option value="OR">OR</option>
+                        </select>
+                        <label for="operator1">Operator</label>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="add-rule" class="btn">Add Another Rule</button>
+            <button class="btn waves-effect waves-light" type="submit">Combine Rules</button>
+        </form>
+        <pre id="combine-rules-result"></pre>
+
+        <h2>Evaluate Rule</h2>
+        <form id="evaluate-rule-form">
+            <div class="input-field">
+                <input type="text" id="evaluate-ast" name="ast" required>
+                <label for="evaluate-ast">Rule Name</label>
+            </div>
+            <div class="input-field">
+                <textarea id="evaluate-data" name="data" required class="materialize-textarea"></textarea>
+                <label for="evaluate-data">Data JSON</label>
+            </div>
+            <button class="btn waves-effect waves-light" type="submit">Evaluate Rule</button>
+        </form>
+        <pre id="evaluate-rule-result"></pre>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems);
+        });
+
+        // Handle Create Rule form submission
+        document.getElementById('create-rule-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const ruleName = document.getElementById('ruleName').value;
+            const ruleString = document.getElementById('ruleString').value;
+            const response = await fetch('/api/rules/create_rule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ruleName, ruleString }),
+            });
+            const result = await response.json();
+            document.getElementById('create-rule-result').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // Handle Combine Rules form submission
+        document.getElementById('combine-rules-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const op = document.getElementById('operator1').value;
+            const rules = Array.from(document.querySelectorAll('input[id^="combine-rule"]')).map(input => input.value);
+            const response = await fetch('/api/rules/combine_rules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rules, op }),
+            });
+            const result = await response.json();
+            document.getElementById('combine-rules-result').textContent = JSON.stringify(result, null, 2);
+        });
+
+        // Add functionality to dynamically add more rule inputs
+        document.getElementById('add-rule').addEventListener('click', function() {
+            const ruleInputContainer = document.createElement('div');
+            ruleInputContainer.classList.add('rule-container');
+            const ruleCount = document.querySelectorAll('input[id^="combine-rule"]').length + 1;
+            ruleInputContainer.innerHTML = `
+                <div class="input-field">
+                    <input type="text" id="combine-rule${ruleCount}" name="rule${ruleCount}" required>
+                    <label for="combine-rule${ruleCount}">Rule ${ruleCount}</label>
+                </div>
+                <div class="input-field">
+                    <select id="operator${ruleCount}" name="operator${ruleCount}">
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                    </select>
+                    <label for="operator${ruleCount}">Operator</label>
+                </div>
+            `;
+            document.getElementById('rules-inputs').appendChild(ruleInputContainer);
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems);
+        });
+
+        // Handle Evaluate Rule form submission
+        document.getElementById('evaluate-rule-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const ast = document.getElementById('evaluate-ast').value;
+            const data = document.getElementById('evaluate-data').value;
+            const response = await fetch('/api/rules/evaluate_rule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ast, data: JSON.parse(data) }),
+            });
+            const result = await response.json();
+            document.getElementById('evaluate-rule-result').textContent = JSON.stringify(result, null, 2);
+        });
+    </script>
+</body>
+</html>
