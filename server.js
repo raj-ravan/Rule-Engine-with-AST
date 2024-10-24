@@ -12,7 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-mongoose.connect('mongodb+srv://raj8584:qwert001Raj@cluster1.e182p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1', {
+mongoose.connect('mongodb+srv://rajnarayan8584:qwert001Raj@rules.drtfl.mongodb.net/?retryWrites=true&w=majority&appName=rules', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
