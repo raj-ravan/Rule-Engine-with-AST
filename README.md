@@ -24,8 +24,8 @@ This application serves as a flexible rule engine that determines user eligibili
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm package manager
+- Node.js (v18.14.0 or higher)
+- npm package manager (9.4.1)
 - MongoDB (v4.4 or higher)
 
 ### Installation
