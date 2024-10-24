@@ -154,25 +154,7 @@ POST /api/rules/evaluate_rule
 - Comparison: `>, <, =, >=, <=`
 - Logical: `AND, OR`
 
-### Example Rules
-```
-"age > 25 AND department = 'Engineering'"
-"(salary >= 50000 OR experience > 3) AND department = 'Sales'"
-```
-
-## Best Practices
-
-1. **Rule Naming**
-   - Use descriptive names for rules
-   - Follow a consistent naming convention
-   - Include version or date if applicable
-
-2. **Rule Structure**
-   - Keep rules modular and focused
-   - Break complex rules into smaller, reusable components
-   - Use parentheses to clearly define operation precedence
-
-3. **Testing**
+### Example Rulescd
    - Test rules with edge cases
    - Validate rule syntax before creation
    - Maintain a test suite for critical rules

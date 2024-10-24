@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Route for serving the index.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, './views/index.html'));
+  res.sendFile(path.join(__dirname, './index.html'));
 });
 app.use('/api/rules', ruleRoutes);
 
